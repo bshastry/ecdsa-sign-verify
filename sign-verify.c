@@ -17,6 +17,8 @@ void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const
 
 int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
 
+    // We need 32 bytes for private key and at least
+    // 1 byte for message to be signed
     if (Size < 33) {
         return 0;
     }
@@ -30,10 +32,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
     Data += 32;
     Size -= 32;
 
-    const char *message = (const char *)Data;
-    if (strlen(message) < 1 || strlen(message) != Size - 1) {
-        return 0;
-    }
+    const uint8_t *message = Data;
 
     key = bbp_ec_new_keypair(priv_bytes);
     if (!key) {
@@ -43,8 +42,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
         return 0;
     }
 
-    signMessageDigest(signature, (uint8_t *)&digest[0], key,
-                      (const uint8_t *)message);
+    signMessageDigest(signature, (uint8_t *)&digest[0], key, message);
     assert(signature);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
