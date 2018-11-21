@@ -2,8 +2,8 @@
 #include "ec.h"
 #include "hash.h"
 
-void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const uint8_t *message) {
-    bbp_sha256(digest, message, strlen((const char *)message));
+void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const uint8_t *message, size_t msg_len) {
+    bbp_sha256(digest, message, msg_len);
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     bbp_print_hex("digest: ", digest, 32);
 #endif
@@ -42,7 +42,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
         goto done;
     }
 
-    signMessageDigest(signature, (uint8_t *)&digest[0], key, message);
+    signMessageDigest(signature, (uint8_t *)&digest[0], key, message, Size);
     assert(signature);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
