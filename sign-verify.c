@@ -15,8 +15,6 @@ void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, const EC_KEY *key,
 #endif
 }
 
-void verifySign(ECDSA_SIG *signature, const EC_KEY *key, )
-
 int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
 
     if (Size < 33) {
