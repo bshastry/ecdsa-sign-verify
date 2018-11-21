@@ -39,7 +39,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
         printf("Unable to create keypair\n");
 #endif
-        return 0;
+        goto done;
     }
 
     signMessageDigest(signature, (uint8_t *)&digest[0], key, message);
@@ -47,8 +47,9 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
 
+done:
     ECDSA_SIG_free(signature);
     EC_KEY_free(key);
-
+    free(priv_bytes);
     return 0;
 }
