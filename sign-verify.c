@@ -8,7 +8,7 @@ void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const
     bbp_print_hex("digest: ", digest, 32);
 #endif
 
-    signature = ECDSA_do_sign(digest, sizeof(digest), key);
+    signature = ECDSA_do_sign(digest, 32, key);
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     printf("r: %s\n", BN_bn2hex(signature->r));
     printf("s: %s\n", BN_bn2hex(signature->s));
@@ -43,9 +43,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
     }
 
     signMessageDigest(signature, (uint8_t *)&digest[0], key, message, Size);
-    if (!signature) {
-        goto done;
-    }
+    assert(signature);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
 
