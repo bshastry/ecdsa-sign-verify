@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ec.h"
 #include "hash.h"
+#include <openssl/opensslconf.h>
 
 void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const uint8_t *message, size_t msg_len) {
     bbp_sha256(digest, message, msg_len);
@@ -52,4 +53,11 @@ done:
     EC_KEY_free(key);
     free(priv_bytes);
     return 0;
+}
+
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL);
+    ERR_get_state();
+    return 1;
 }
