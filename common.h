@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include "endian.h"
 
 void bbp_print_hex(const char *label, const uint8_t *v, size_t len) {

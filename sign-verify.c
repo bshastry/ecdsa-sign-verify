@@ -30,11 +30,10 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
     Data += 32;
     Size -= 32;
 
-    if (strlen(Data) < 1 || strlen(Data) != Size - 1) {
+    const char *message = (const char *)Data;
+    if (strlen(message) < 1 || strlen(message) != Size - 1) {
         return 0;
     }
-
-    const char *message = (const char *)Data;
 
     key = bbp_ec_new_keypair(priv_bytes);
     if (!key) {
@@ -44,7 +43,8 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
         return 0;
     }
 
-    signMessageDigest(signature, (uint8_t *)&digest[0], key, message);
+    signMessageDigest(signature, (uint8_t *)&digest[0], (const EC_KEY *) key,
+                      (const uint8_t *)message);
     assert(signature);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
