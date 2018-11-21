@@ -43,7 +43,9 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
     }
 
     signMessageDigest(signature, (uint8_t *)&digest[0], key, message, Size);
-    assert(signature);
+    if (!signature) {
+        goto done;
+    }
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
 
