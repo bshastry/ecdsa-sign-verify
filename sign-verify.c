@@ -1,7 +1,8 @@
 #include "common.h"
 #include "ec.h"
 #include "hash.h"
-#include <openssl/opensslconf.h>
+#include <openssl/err.h>
+#include <openssl/crypto.h>
 
 void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const uint8_t *message, size_t msg_len) {
     bbp_sha256(digest, message, msg_len);
