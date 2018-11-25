@@ -12,8 +12,10 @@ void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const
 
     signature = ECDSA_do_sign(digest, 32, key);
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-    printf("r: %s\n", BN_bn2hex(signature->r));
-    printf("s: %s\n", BN_bn2hex(signature->s));
+    const BIGNUM *sig_r, *sig_s;
+    ECDSA_SIG_get0(signature, &sig_r, &sig_s);
+    printf("r: %s\n", BN_bn2hex(sig_r));
+    printf("s: %s\n", BN_bn2hex(sig_s));
 #endif
 }
 
