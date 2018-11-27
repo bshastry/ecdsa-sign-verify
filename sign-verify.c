@@ -4,16 +4,16 @@
 #include <openssl/err.h>
 #include <openssl/crypto.h>
 
-void signMessageDigest(ECDSA_SIG *signature, uint8_t *digest, EC_KEY *key, const uint8_t *message, size_t msg_len) {
+void signMessageDigest(ECDSA_SIG **signature, uint8_t *digest, EC_KEY *key, const uint8_t *message, size_t msg_len) {
     bbp_sha256(digest, message, msg_len);
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     bbp_print_hex("digest: ", digest, 32);
 #endif
 
-    signature = ECDSA_do_sign(digest, 32, key);
+    *signature = ECDSA_do_sign(digest, 32, key);
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     const BIGNUM *sig_r, *sig_s;
-    ECDSA_SIG_get0(signature, &sig_r, &sig_s);
+    ECDSA_SIG_get0(*signature, &sig_r, &sig_s);
     printf("r: %s\n", BN_bn2hex(sig_r));
     printf("s: %s\n", BN_bn2hex(sig_s));
 #endif
@@ -46,7 +46,7 @@ int LLVMFuzzerTestOneInput(uint8_t *Data, size_t Size) {
         goto done;
     }
 
-    signMessageDigest(signature, (uint8_t *)&digest[0], key, message, Size);
+    signMessageDigest(&signature, (uint8_t *)&digest[0], key, message, Size);
     assert(signature);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
     assert(verified == 1);
@@ -64,3 +64,4 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     ERR_get_state();
     return 1;
 }
+
