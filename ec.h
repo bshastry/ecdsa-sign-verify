@@ -54,4 +54,41 @@ EC_KEY *bbp_ec_new_pubkey(const uint8_t *pub_bytes, size_t pub_len) {
     return key;
 }
 
+EC_KEY *bbp_ec_new_keypair_from_hex(const char *priv_hex) {
+    EC_KEY *key;
+    BIGNUM *priv;
+    BN_CTX *ctx;
+    const EC_GROUP *group;
+    EC_POINT *pub;
+
+    /* init empty OpenSSL EC keypair */
+
+    key = EC_KEY_new_by_curve_name(NID_secp256k1);
+
+    /* set private key through BIGNUM */
+
+    priv = BN_new();
+    BN_hex2bn(&priv, priv_hex);
+    EC_KEY_set_private_key(key, priv);
+
+    /* derive public key from private key and group */
+
+    ctx = BN_CTX_new();
+    BN_CTX_start(ctx);
+
+    group = EC_KEY_get0_group(key);
+    pub = EC_POINT_new(group);
+    EC_POINT_mul(group, pub, priv, NULL, NULL, ctx);
+    EC_KEY_set_public_key(key, pub);
+
+    /* release resources */
+
+    EC_POINT_free(pub);
+    BN_CTX_end(ctx);
+    BN_CTX_free(ctx);
+    BN_clear_free(priv);
+
+    return key;
+}
+
 #endif

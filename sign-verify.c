@@ -64,4 +64,3 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     ERR_get_state();
     return 1;
 }
-
